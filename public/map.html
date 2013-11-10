@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hack4MN TextMyPark</title>
+
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/jquery-1.10.2.min.js"></script>
+    
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" />
+    <!--[if lte IE 8]>
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.ie.css" />
+    <![endif]-->
+
+    <!-- Leaflet.js mapping library -->
+    <script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
+    <script src="js/leaflet.markercluster-src.js"></script>
+
+    <!-- Google Maps for Leaflet -->
+    <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
+    <script src="js/Google.js"></script>
+
+
+    <script>
+
+    var eventsdata = {};
+
+    var sampledata = [
+    {
+      "date": "2013-11-10T00:00:00.000Z",
+      "park": "corcoran",
+      "lat":"44.9833", 
+      "long":"-93.2667",
+      "game": "baseball",
+      "start_time": "2013-11-10T18:00:00.000Z",
+      "end_time": "2013-11-10T20:00:00.000Z",
+      "extra_info": "Audlt and kids welcome!",
+      "url": "http://localhost:3000/events/1.json"
+    },
+    {
+      "date": "2013-11-10T00:00:00.000Z",
+      "park": "corcoran",
+      "lat":"44.9422", 
+      "long":"-93.2438",
+      "game": "mojo kickball",
+      "start_time": "2013-11-10T18:00:00.000Z",
+      "end_time": "2013-11-10T20:00:00.000Z",
+      "extra_info": "Audlt and kids welcome!",
+      "url": "http://localhost:3000/events/2.json"
+    },
+    {
+      "date": "2013-11-11T00:00:00.000Z",
+      "park": "corcoran",
+      "lat":"44.9833", 
+      "long":"-93.2667",
+      "game": "quidditch",
+      "start_time": null,
+      "end_time": null,
+      "extra_info": "Kids welcome!",
+      "url": "http://localhost:3000/events/3.json"
+    }];
+
+    // AJAX request to get eventsdata JSON data from Heroku server
+    $.ajax({
+          url: 'http://textmypark.herokuapp.com/events.json',
+          dataType: 'jsonp',
+        success: function(data){
+           eventsdata = data;
+          },
+        error: function(err){
+           console.log(err);
+         }
+       });
+    
+    
+
+    </script>
+
+
+
+  </head>
+  <body>
+
+    <div id="parkspanel">
+      <h1>Text My Park</h1>
+    </div>
+
+
+    <div id="parksmap"></div>
+    
+    <script type='text/javascript'>
+      
+      // Make a map centered on Minneapolis, using Google Maps as baselayer
+      var map = L.map('parksmap').setView([44.9833, -93.2667], 11);
+      var googleLayer = new L.Google('ROADMAP');
+      map.addLayer(googleLayer);
+
+      // Define 'events' variable to add events markers to; define them as a MarkerClusterGroup so they'll cluster using MarkerCluster extension from Leaflet
+      var events = new L.MarkerClusterGroup();
+
+
+      // Populate map with eventsdata
+      if(eventsdata.length) {
+        $.each(eventsdata, function( index, obj ){
+         console.log(index, obj);
+          var starttime = new Date(obj.start_time).toLocaleString();
+          var endtime = new Date(obj.end_time).toLocaleString();
+
+          events.addLayer(L.marker([44.9833, -93.2667]).bindPopup(
+                        "<h1>" + obj.game + "</h1>"
+                        + "<h2>" + obj.park + "</h2>" 
+                        + "<h3>" + starttime + "</h3>"
+                        + "<h3>" + endtime + "</h3>"
+                        + "<p>" + obj.extra_info + "</p>"));
+      });
+      
+      }
+      
+
+      // Populate map with some sample data so the map looks cool, even if the eventsdata isn't loading
+      $.each(sampledata, function( index, obj ){
+
+        // Convert dates from ISO 8601 format to human-friendly format
+        var starttime = new Date(obj.start_time).toLocaleString();
+        var endtime = new Date(obj.end_time).toLocaleString();
+
+        events.addLayer(L.marker([obj.lat, obj.long]).bindPopup(
+                        "<h1>" + obj.game + "</h1>"
+                        + "<h2>" + obj.park + "</h2>" 
+                        + "<h3>" + starttime + "</h3>"
+                        + "<h3>" + endtime + "</h3>"
+                        + "<p>" + obj.extra_info + "</p>"));
+      });
+
+      map.addLayer(events);
+
+
+    </script>
+  </body>
+</html>

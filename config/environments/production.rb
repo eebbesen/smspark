@@ -20,7 +20,10 @@ Smspark::Application.configure do
   # config.action_dispatch.rack_cache = true
 
   # Disable Rails's static asset server (Apache or nginx will already do this).
-  config.serve_static_assets = false
+  # https://devcenter.heroku.com/articles/rack-cache-memcached-rails31#serve_static_assets
+  config.serve_static_assets = true
+  config.static_cache_control = "public, max-age=2592000"
+  config.action_controller.perform_caching = true
 
   # Compress JavaScripts and CSS.
   config.assets.js_compressor = :uglifier

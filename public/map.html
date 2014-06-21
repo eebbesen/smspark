@@ -11,6 +11,8 @@
         <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.ie.css" />
     <![endif]-->
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
     <!-- Leaflet.js mapping library -->
     <script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
     <script src="js/leaflet.markercluster-src.js"></script>
@@ -24,6 +26,7 @@
   <body>
 
     <div id="parkspanel">
+      <button id="locatebutton">Locate me!</button>
       <h1>Text My Park</h1>
 
       <div id="eventsdata">
@@ -37,11 +40,15 @@
 
     <script>
 
-    var mapit = function(){
+    var mapit = function(userlat, userlong){
+      //var userlat = 44.9833;
+      //var userlong = -93.2667;
+
       // Make a map centered on Minneapolis, using Google Maps as baselayer
-      var map = L.map('parksmap').setView([44.9833, -93.2667], 11);
+      var map = L.map('parksmap').setView([userlat, userlong], 12);
       var googleLayer = new L.Google('ROADMAP');
       map.addLayer(googleLayer);
+
 
       getparksdata();
 
@@ -52,7 +59,7 @@
       // Add events data as a layer
       map.addLayer(events);      
     };
-    
+
 
     // Define 'events' variable to add events markers to; define them as a MarkerClusterGroup so they'll cluster using MarkerCluster extension from Leaflet
     var events = new L.MarkerClusterGroup();
@@ -130,7 +137,7 @@
 
           // Creates a layer for each park data point using parks data from Socrata
           $.each(parksdata, function( index, obj ){
-            events.addLayer(L.marker([44.985, -93.265]).bindPopup(
+            events.addLayer(L.marker([obj.geocode.longitude, obj.geocode.latitude]).bindPopup(
                           "<h2>" + obj.park_name + "</h2>"
                           + "<p>" + obj.address + "</p>"));
           });
@@ -181,7 +188,37 @@
        });
     };
 
-    mapit();
+
+    function errorPosition(err){
+      if (err.code == 1){
+        alert("You need to share your location to use this app!");
+      } else if(err.code == 2){
+        alert("Hmm... Looks like your postion isn't available right now. Please try again soon!");
+      } else {
+        alert("Sorry! Can't find your location for some reason. Please refresh the page and try again.");
+      }
+    }
+
+    function successPosition(position){
+      var userlat = position.coords.latitude;
+      var userlong = position.coords.longitude;
+      console.log(userlat);
+      console.log(userlong);
+      console.log("Congrats! Your position was set from the browser.")
+
+      mapit(userlat, userlong);
+    }
+
+    // Check if the browser supports geolocation
+    if (navigator.geolocation){
+      $("#locatebutton").click(function(){
+        navigator.geolocation.getCurrentPosition(successPosition, errorPosition, { timeout: 10000 });
+      });
+    } else {
+      alert("Sorry, your browser doesn't support the Geolocation API.");  
+    }
+
+    
     
     
 

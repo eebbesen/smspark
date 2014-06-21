@@ -41,10 +41,8 @@
     <script>
 
     var mapit = function(userlat, userlong){
-      //var userlat = 44.9833;
-      //var userlong = -93.2667;
 
-      // Make a map centered on Minneapolis, using Google Maps as baselayer
+      // Make a map centered on user location (or default to Minneapolis), using Google Maps as baselayer
       var map = L.map('parksmap').setView([userlat, userlong], 12);
       var googleLayer = new L.Google('ROADMAP');
       map.addLayer(googleLayer);
@@ -191,11 +189,17 @@
 
     function errorPosition(err){
       if (err.code == 1){
+        var userlat = 44.9833;
+        var userlong = -93.2667;
         alert("You need to share your location to use this app!");
       } else if(err.code == 2){
-        alert("Hmm... Looks like your postion isn't available right now. Please try again soon!");
+        var userlat = 44.9833;
+        var userlong = -93.2667;
+        alert("Hmm... Looks like your postion isn't available right now. Using default coordinates.");
       } else {
-        alert("Sorry! Can't find your location for some reason. Please refresh the page and try again.");
+        var userlat = 44.9833;
+        var userlong = -93.2667;
+        alert("Sorry! Can't find your location for some reason. Using default coordinates.");
       }
     }
 
@@ -215,7 +219,9 @@
         navigator.geolocation.getCurrentPosition(successPosition, errorPosition, { timeout: 10000 });
       });
     } else {
-      alert("Sorry, your browser doesn't support the Geolocation API.");  
+      var userlat = 44.9833;
+      var userlong = -93.2667;
+      alert("Sorry, your browser doesn't support geolocation. Using default coordinates.");  
     }
 
     

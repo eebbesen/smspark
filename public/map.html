@@ -19,15 +19,48 @@
     <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
     <script src="js/Google.js"></script>
 
+  </head>
+
+  <body>
+
+    <div id="parkspanel">
+      <h1>Text My Park</h1>
+
+      <div id="eventsdata">
+      </div>
+
+    </div>
+
+
+    <div id="parksmap"></div>
+
 
     <script>
 
-    var eventsdata = {};
+    var mapit = function(){
+      // Make a map centered on Minneapolis, using Google Maps as baselayer
+      var map = L.map('parksmap').setView([44.9833, -93.2667], 11);
+      var googleLayer = new L.Google('ROADMAP');
+      map.addLayer(googleLayer);
+
+      getparksdata();
+
+      geteventsdata();
+
+      getsampledata();
+
+      // Add events data as a layer
+      map.addLayer(events);      
+    };
+    
+
+    // Define 'events' variable to add events markers to; define them as a MarkerClusterGroup so they'll cluster using MarkerCluster extension from Leaflet
+    var events = new L.MarkerClusterGroup();
 
     var sampledata = [
     {
       "date": "2013-11-10T00:00:00.000Z",
-      "park": "corcoran",
+      "park": "phillips",
       "lat":"44.9833", 
       "long":"-93.2667",
       "game": "baseball",
@@ -49,7 +82,7 @@
     },
     {
       "date": "2013-11-11T00:00:00.000Z",
-      "park": "corcoran",
+      "park": "hogwarts",
       "lat":"44.9833", 
       "long":"-93.2667",
       "game": "quidditch",
@@ -59,64 +92,13 @@
       "url": "http://localhost:3000/events/3.json"
     }];
 
-    // AJAX request to get eventsdata JSON data from Heroku server
-    $.ajax({
-          url: 'http://textmypark.herokuapp.com/events.json',
-          dataType: 'jsonp',
-        success: function(data){
-           eventsdata = data;
-          },
-        error: function(err){
-           console.log(err);
-         }
-       });
-    
-    
+    var getsampledata = function () {
+      // Add sampledata info from each event to textbox
+          $.each(sampledata, function( index, obj ){
+            $('#eventsdata').append("<h2>" + obj.park + "</h2>" + "<p>" + obj.extra_info + "</p>");
+          });      
 
-    </script>
-
-
-
-  </head>
-  <body>
-
-    <div id="parkspanel">
-      <h1>Text My Park</h1>
-    </div>
-
-
-    <div id="parksmap"></div>
-    
-    <script type='text/javascript'>
-      
-      // Make a map centered on Minneapolis, using Google Maps as baselayer
-      var map = L.map('parksmap').setView([44.9833, -93.2667], 11);
-      var googleLayer = new L.Google('ROADMAP');
-      map.addLayer(googleLayer);
-
-      // Define 'events' variable to add events markers to; define them as a MarkerClusterGroup so they'll cluster using MarkerCluster extension from Leaflet
-      var events = new L.MarkerClusterGroup();
-
-
-      // Populate map with eventsdata
-      if(eventsdata.length) {
-        $.each(eventsdata, function( index, obj ){
-         console.log(index, obj);
-          var starttime = new Date(obj.start_time).toLocaleString();
-          var endtime = new Date(obj.end_time).toLocaleString();
-
-          events.addLayer(L.marker([44.9833, -93.2667]).bindPopup(
-                        "<h1>" + obj.game + "</h1>"
-                        + "<h2>" + obj.park + "</h2>" 
-                        + "<h3>" + starttime + "</h3>"
-                        + "<h3>" + endtime + "</h3>"
-                        + "<p>" + obj.extra_info + "</p>"));
-      });
-      
-      }
-      
-
-      // Populate map with some sample data so the map looks cool, even if the eventsdata isn't loading
+      //Populate map with some sample data so the map looks cool, even if the eventsdata isn't loading
       $.each(sampledata, function( index, obj ){
 
         // Convert dates from ISO 8601 format to human-friendly format
@@ -130,8 +112,86 @@
                         + "<h3>" + endtime + "</h3>"
                         + "<p>" + obj.extra_info + "</p>"));
       });
+    };
+    
 
-      map.addLayer(events);
+    // AJAX request to get parksdata JSON data from Socrata
+    var getparksdata = function() {
+      $.ajax({
+          url: 'http://communities.socrata.com/resource/9tqz-ayry.json',
+          dataType: 'json',
+        success: function(data){
+          parksdata = data;
+
+          // Add parksdata info from each event to textbox
+          $.each(parksdata, function( index, obj ){
+            $('#eventsdata').append("<h2>" + obj.park_name + "</h2>" + "<p>" + obj.address + "</p>");
+          });
+
+          // Creates a layer for each park data point using parks data from Socrata
+          $.each(parksdata, function( index, obj ){
+            events.addLayer(L.marker([44.985, -93.265]).bindPopup(
+                          "<h2>" + obj.park_name + "</h2>"
+                          + "<p>" + obj.address + "</p>"));
+          });
+
+          //console.log(parksdata);
+          },
+        error: function(err){
+           console.log(err);
+         }
+       });
+    };
+
+
+    // AJAX request to get eventsdata JSON data from Heroku server
+    var geteventsdata = function () {
+      $.ajax({
+          url: 'http://textmypark.herokuapp.com/events.json',
+          dataType: 'jsonp',
+        success: function(data){
+          eventsdata = data;
+
+          // Add eventsdata info from each event to textbox
+          $.each(eventsdata, function( index, obj ){
+            $('#eventsdata').append("<h2>" + obj.park + "</h2>" + "<p>" + obj.extra_info + "</p>");
+          });
+
+          // Populate map with eventsdata
+          if(eventsdata.length) {
+            $.each(eventsdata, function( index, obj ){
+
+              var starttime = new Date(obj.start_time).toLocaleString();
+              var endtime = new Date(obj.end_time).toLocaleString();
+
+              events.addLayer(L.marker([44.9833, -93.2667]).bindPopup(
+                            "<h1>" + obj.game + "</h1>"
+                            + "<h2>" + obj.park + "</h2>" 
+                            + "<h3>" + starttime + "</h3>"
+                            + "<h3>" + endtime + "</h3>"
+                            + "<p>" + obj.extra_info + "</p>"));
+            });
+          }
+
+          console.log(eventsdata);
+          },
+        error: function(err){
+           console.log(err);
+         }
+       });
+    };
+
+    mapit();
+    
+    
+
+    </script>
+
+    
+    <script type='text/javascript'>
+      
+
+      
 
 
     </script>

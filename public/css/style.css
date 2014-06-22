@@ -4,11 +4,11 @@ body{
 
 #parksmap{
 	width: 100%;
-	height: 500px;
+	height: 800px;
 }
 
 #parkspanel{
-	background-color: #ffffff;
+	background-color: #BCED91;
 	padding: 10px;
 	position:fixed;
 	top: 20px;

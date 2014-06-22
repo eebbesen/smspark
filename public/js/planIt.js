@@ -1,3 +1,7 @@
+// GEOLOCATE THE USER
+// Check if the browser supports geolocation, and set userlat/userlong coordinates.
+// Or, if browser doesn't support geolocation set default coordinates centered on Mpls.
+
 var checkGeo = function(){
 	// Check if the browser supports geolocation
 	if (navigator.geolocation){
@@ -35,27 +39,40 @@ var errorPosition = function(err){
 	initMap(userlat, userlong);
 };
 
+
+// INITIALIZE THE MAP
 var initMap = function(userlat, userlong){
-	// Define 'events' variable to add events markers to; define them as a MarkerClusterGroup so they'll cluster using MarkerCluster extension from Leaflet
-	//var events = new L.MarkerClusterGroup();
 	// Make a map centered on user location (or default to Minneapolis), using Google Maps as baselayer
-	var map = L.map('parksmap').setView([userlat, userlong], 12);
+	var map = L.map('parksmap').setView([userlat, userlong], 14);
 	var googleLayer = new L.Google('ROADMAP');
 	map.addLayer(googleLayer);
-	mapit(map);
-};
 
-var mapit = function(map){
+	// Call mapIt function, which adds data layers to map
+	mapIt(map);
+};
+	
+
+var mapIt = function(map){
+	// Initiate an 'events' array, and turn it into a ClusterGroup so leaflet.markercluster
+	// plugin can auto-cluster events for display 
 	var events = new L.MarkerClusterGroup();
+	
+	// Populate 'events' array with data from different sources (Socrata, Twilio/Heroku, etc.)
+	getsampledata(events);
 	getparksdata(events);
 	geteventsdata(events);
-	getsampledata(events);
 
 	// Add events data as a layer
-	map.addLayer(events);      
+	map.addLayer(events);
+
+	// Add clickable park boundaries as a GeoJSON layer
+	mapparkboundaries(map);    
 };
 
-// --------- Data sources -----------------
+
+// --------- DATA SOURCES -------------
+
+// Define some sample data to display, if all else fails
 var sampledata = [
 {
 	"date": "2013-11-10T00:00:00.000Z",
@@ -139,7 +156,7 @@ var getparksdata = function(events) {
 	 });
 };
 
-// AJAX request to get eventsdata JSON data from Heroku server
+// AJAX request to get eventsdata JSON data from Heroku server (submitted via text using Twilio)
 var geteventsdata = function (events) {
 	$.ajax({
 			//url: 'http://textmypark.herokuapp.com/events.json',
@@ -172,4 +189,30 @@ var geteventsdata = function (events) {
 		 }
 	 });
 };
+
+
+// getJSON request to add Minneapolis park boundaries data from parkssimple.geojson
+// file, and add popup displaying park attributes
+var mapparkboundaries = function(map) {
+	var parkboundariesstyle = {
+	    "color": "#3B5323",
+	    "weight": 5,
+	    "opacity": 0.65
+	};
+
+	$.getJSON("../parkssimple.geojson", function(data) {
+	    var parkboundaries = L.geoJson(data, {
+	    	style: parkboundariesstyle,
+	      	onEachFeature: function (feature, layer) {
+		        layer.bindPopup("<h2>" + feature.properties.mpls_par_1 + "</h2>"
+		        	+ "<h3>" + feature.properties.mpls_par_3 + "</h3>"
+		        	+ "<p>" + feature.properties.mpls_par_5 + "</p>"
+		        	+ "<a href=" + feature.properties.mpls_parks + " target='_blank'>Go to website!</a>");
+		      }
+	    });
+	    console.log(parkboundaries);
+	    parkboundaries.addTo(map);    	
+    });    
+};
+
 // --------- end Data sources -----------------

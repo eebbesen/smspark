@@ -1,6 +1,6 @@
-TextMyPark
+PlanIt / TextMyPark
 ==========
-Provides citizens a mechanism to make Parks and Recreation officials and other citizens aware of 'unofficial' events taking place in parks. 
+Provides citizens a mechanism to advertise 'unofficial' events (pick-up sports games, service projects, etc.) taking place in parks and neighborhoods around the Twin Cities.  Also help Parks and Recreation officials and other citizens become aware of park usage and the role of parks in our communities.
 
 How to Use
 ----------
@@ -16,4 +16,4 @@ Technology Stack
 
 History
 -------
-TextMyPark was originally ideated at CodeCampMN 2013's hackathon in early November 2013.
+This app was originally ideated at CodeCampMN 2013's hackathon in early November 2013 under the name "TextMyPark".  It was expanded on during Hack For MN in June 2014 with a name change to "PlanIt".

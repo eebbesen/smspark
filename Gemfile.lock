@@ -54,7 +54,11 @@ GEM
     mime-types (1.25)
     minitest (4.7.5)
     multi_json (1.8.2)
+<<<<<<< HEAD
     pg (0.15.1)
+=======
+    pg (0.17.1)
+>>>>>>> 8c7ff60243e36bfe86bd88066ce8b593a1f1ded1
     polyglot (0.3.3)
     rack (1.5.2)
     rack-test (0.6.2)

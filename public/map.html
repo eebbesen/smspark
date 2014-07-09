@@ -28,6 +28,12 @@
   <script>
 	//Init and run mapping, data gathering functions
 		$(document).ready(function() {
+      // DEFINE MAP
+      // Create map, using Google Maps as baselayer
+      var map = L.map('parksmap').setView([44.9833, -93.2667], 14);
+      var googleLayer = new L.Google('ROADMAP');
+      map.addLayer(googleLayer);
+      
 			checkGeo();
 		});
 	</script>

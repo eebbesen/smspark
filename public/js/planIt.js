@@ -9,24 +9,25 @@ var checkGeo = function(){
 	} else {
 		var userlat = 44.9833;
 		var userlong = -93.2667;
-		alert("Sorry, your browser doesn't support geolocation. Using default coordinates.");  
+		alert("Sorry, your browser doesn't support geolocation. Using default coordinates.");
+		initMap(userlat, userlong, map); 
 	}
 };
 
-var successPosition = function(position){
+var successPosition = function(position, map){
 	var userlat = position.coords.latitude;
 	var userlong = position.coords.longitude;
 	//console.log(userlat);
 	//console.log(userlong);
 	//console.log("Congrats! Your position was set from the browser.")
-	initMap(userlat, userlong);
+	initMap(userlat, userlong, map);
 };
 
-var errorPosition = function(err){
+var errorPosition = function(err, map){
 	if (err.code == 1){
 		var userlat = 44.9833;
 		var userlong = -93.2667;
-		alert("You need to share your location to use this app!");
+		alert("Looks like you aren't sharing your location! Using default coordinates.");
 	} else if(err.code == 2){
 		var userlat = 44.9833;
 		var userlong = -93.2667;
@@ -36,19 +37,27 @@ var errorPosition = function(err){
 		var userlong = -93.2667;
 		alert("Sorry! Can't find your location for some reason. Using default coordinates.");
 	}
-	initMap(userlat, userlong);
+	initMap(userlat, userlong, map);
 };
 
 
+function onLocationFound(e) {
+		console.log("Adding marker at your location!");
+	    // create a marker at the users "latlng" and add it to the map
+	    L.marker(e.latlng).addTo(map);
+	    
+};
+
+map.on('locationfound', onLocationFound);
+
 // INITIALIZE THE MAP
-var initMap = function(userlat, userlong){
-	// Make a map centered on user location (or default to Minneapolis), using Google Maps as baselayer
-	var map = L.map('parksmap').setView([userlat, userlong], 14);
-	var googleLayer = new L.Google('ROADMAP');
-	map.addLayer(googleLayer);
+var initMap = function(userlat, userlong, map){
+	// Update map to center on user location (or default to Minneapolis)
+	map.locate({setView: true, maxZoom: 14});
 
 	// Call mapIt function, which adds data layers to map
 	mapIt(map);
+
 };
 	
 
